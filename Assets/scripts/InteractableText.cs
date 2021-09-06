@@ -1,30 +1,65 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+
+[System.Serializable]
 public class InteractableText : MonoBehaviour
 {
-    // Start is called before the first frame update
-    public Canvas theCanvaas;
+    // important stuff
+    
     public Text displayText;
-    public string[] objectsText;
+    public string[] sentences;
+    private int index;
+    public float typingSpeed;
+    public GameObject continueButton;
+
+    //not important now
     private bool isActive;
     private bool playerInArea = false;
-    private int index = 0;
+    public Canvas theCanvaas;
+
+    IEnumerator Type()
+    {
+        
+        foreach(char letter in sentences[index].ToCharArray())
+        {
+            displayText.text += letter;
+            yield return new WaitForSeconds(typingSpeed);
+        }
+    }
     void Start()
     {
-        theCanvaas.gameObject.SetActive(false);
-        isActive = false;
+        //StartCoroutine("Type");
+        //theCanvaas.gameObject.SetActive(false);
+        //isActive = false;
     }
-
-    // Update is called once per frame
     void Update()
     {
-      
-
+        if(displayText.text == sentences[index])
+        {
+            continueButton.SetActive(true);
+        }
     }
 
+    public void NextSentence()
+    {
+        continueButton.SetActive(false);
+
+        if (index < sentences.Length - 1)
+        {
+            index++;
+            displayText.text = "";
+            StartCoroutine("Type");
+        }
+        else
+        {
+            displayText.text = "";
+            continueButton.SetActive(false);
+        }
+    }
 
     private void OnTriggerStay(Collider other)
     {
@@ -33,33 +68,17 @@ public class InteractableText : MonoBehaviour
             
             if (!isActive) { 
                 
-                    Debug.Log("open");
-                    theCanvaas.gameObject.SetActive(true);
-                    displayText.text = objectsText[index];
-                    isActive = true;
-                
+                theCanvaas.gameObject.SetActive(true);
+                isActive = true;
+                StartCoroutine("Type");
 
             }
             else
             {
-                index++;
-                Debug.Log("what the index: " + index);
-                Debug.Log("what the lenght: " + objectsText.Length);
-                if (index < objectsText.Length)
-                {
-                    displayText.text = objectsText[index];
-                }
-                else
-                {
-                    Debug.Log("close");
-                    theCanvaas.gameObject.SetActive(false);
-                    displayText.text = "";
-                    isActive = false;
-                    index = 0;
+                theCanvaas.gameObject.SetActive(false);
+                isActive = false;
+                index = 0;
 
-                }
-                   
-                
             }
 
         }
